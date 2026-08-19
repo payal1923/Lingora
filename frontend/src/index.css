@@ -1,0 +1,201 @@
+@import "tailwindcss";
+
+@theme {
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ===================================================================
+   Global animations
+   =================================================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===================================================================
+   Android / Capacitor WebView & Global Font settings
+   =================================================================== */
+
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior-y: none;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+input,
+textarea,
+select {
+    font-family: var(--font-sans);
+    font-size: 16px;
+}
+
+/* ===================================================================
+   Production Typography System & Utilities
+   =================================================================== */
+@layer utilities {
+    /* Hero Title: 48–56px / 700 */
+    .typo-hero {
+        font-family: var(--font-sans);
+        font-weight: 700;
+        font-size: clamp(2.75rem, 5vw, 3.5rem);
+        line-height: 1.12;
+        letter-spacing: -0.025em;
+    }
+
+    /* Page Title: 32–36px / 700 */
+    .typo-page-title {
+        font-family: var(--font-sans);
+        font-weight: 700;
+        font-size: clamp(2rem, 3.5vw, 2.25rem);
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+    }
+
+    /* Section Title: 24–28px / 700 */
+    .typo-section-title {
+        font-family: var(--font-sans);
+        font-weight: 700;
+        font-size: clamp(1.5rem, 2.5vw, 1.75rem);
+        line-height: 1.25;
+        letter-spacing: -0.015em;
+    }
+
+    /* Card Title: 20–22px / 600 */
+    .typo-card-title {
+        font-family: var(--font-sans);
+        font-weight: 600;
+        font-size: clamp(1.25rem, 2vw, 1.375rem);
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+    }
+
+    /* Body Text: 16–18px / 400 */
+    .typo-body {
+        font-family: var(--font-sans);
+        font-weight: 400;
+        font-size: clamp(1rem, 1.5vw, 1.125rem);
+        line-height: 1.6;
+    }
+
+    /* Secondary Text: 14–15px / 400 */
+    .typo-secondary {
+        font-family: var(--font-sans);
+        font-weight: 400;
+        font-size: clamp(0.875rem, 1.2vw, 0.9375rem);
+        line-height: 1.5;
+    }
+
+    /* Captions: 12–13px / 500 */
+    .typo-caption {
+        font-family: var(--font-sans);
+        font-weight: 500;
+        font-size: clamp(0.75rem, 1vw, 0.8125rem);
+        line-height: 1.4;
+    }
+
+    /* Badges & Labels: 12–13px / 500 */
+    .typo-badge {
+        font-family: var(--font-sans);
+        font-weight: 500;
+        font-size: clamp(0.75rem, 1vw, 0.8125rem);
+        line-height: 1.2;
+        letter-spacing: 0.025em;
+    }
+
+    /* Buttons: 16–18px / 600 */
+    .typo-button {
+        font-family: var(--font-sans);
+        font-weight: 600;
+        font-size: clamp(1rem, 1.4vw, 1.125rem);
+        line-height: 1.25;
+        letter-spacing: -0.005em;
+    }
+
+    /* Statistics Value: 32–40px / 700 */
+    .typo-stat-value {
+        font-family: var(--font-sans);
+        font-weight: 700;
+        font-size: clamp(2rem, 3.5vw, 2.5rem);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
+    /* Statistics Label: 12–13px / 500 uppercase */
+    .typo-stat-label {
+        font-family: var(--font-sans);
+        font-weight: 500;
+        font-size: clamp(0.75rem, 1vw, 0.8125rem);
+        line-height: 1.3;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    /* AI Tips: 14–16px / 400 leading-relaxed */
+    .typo-ai-tip {
+        font-family: var(--font-sans);
+        font-weight: 400;
+        font-size: clamp(0.875rem, 1.3vw, 1rem);
+        line-height: 1.6;
+    }
+
+    /* Examples: 14–15px / 400 italic */
+    .typo-example {
+        font-family: var(--font-sans);
+        font-weight: 400;
+        font-style: italic;
+        font-size: clamp(0.875rem, 1.2vw, 0.9375rem);
+        line-height: 1.5;
+    }
+
+    /* Safe area helper utilities */
+    .pt-safe {
+        padding-top: env(safe-area-inset-top);
+    }
+
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .pl-safe {
+        padding-left: env(safe-area-inset-left);
+    }
+
+    .pr-safe {
+        padding-right: env(safe-area-inset-right);
+    }
+
+    .mt-safe {
+        margin-top: env(safe-area-inset-top);
+    }
+
+    .mb-safe {
+        margin-bottom: env(safe-area-inset-bottom);
+    }
+
+    .h-safe-bottom {
+        height: env(safe-area-inset-bottom);
+    }
+}

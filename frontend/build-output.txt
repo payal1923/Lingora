@@ -1,0 +1,29 @@
+
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v8.1.3 [32mbuilding client environment for production...[36m[39m
+[2Ktransforming...✓ 2341 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                 0.45 kB │ gzip:   0.29 kB
+dist/assets/lingora-logo-CSrEu6m7.png          36.77 kB
+dist/assets/index-CD3w4UoP.css                118.21 kB │ gzip:  16.01 kB
+dist/assets/web-BMwlq2V-.js                     0.77 kB │ gzip:   0.23 kB
+dist/assets/web-DHu8Kw3u.js                     1.68 kB │ gzip:   0.69 kB
+dist/assets/ScoreBandBadge-Cd3KV2Q-.js          3.63 kB │ gzip:   1.59 kB
+dist/assets/LessonSummary-BvA7FCI3.js           4.27 kB │ gzip:   1.55 kB
+dist/assets/ConversationPractice-BsO_4nAN.js    4.68 kB │ gzip:   1.89 kB
+dist/assets/SentencePractice-0m0BeP0s.js        5.21 kB │ gzip:   1.88 kB
+dist/assets/VocabularyPractice-p1Lwtmz0.js      6.43 kB │ gzip:   2.10 kB
+dist/assets/VoiceStatusBar-CpWHAn4Y.js         12.26 kB │ gzip:   4.34 kB
+dist/assets/index-DvTDsyrS.js                 797.38 kB │ gzip: 223.98 kB
+
+[33m[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mnode_modules/@capacitor-community/text-to-speech/dist/esm/index.js is dynamically imported by src/Hooks/useTextToSpeech.js, src/components/AccentVoiceDemo.jsx but also statically imported by src/pages/ConversationChat.jsx, dynamic import will not move module into another chunk.
+[39m
+[33m[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 2.45s[39m
