@@ -48,7 +48,7 @@ def _to_payload(q):
 def daily_challenge(db: Session = Depends(get_db)):
 
     # Automatically generate more questions if needed
-    # generate_questions_if_needed(db, client)
+    generate_questions_if_needed(db, client)
 
     # Pull more candidates than we need so we can skip any that fail
     # validation and still return a full challenge.
