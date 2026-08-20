@@ -100,7 +100,7 @@ def lesson_ai(lesson_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Lesson not found")
 
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="openai/gpt-oss-20b",
         temperature=0.4,
         messages=[
             {
@@ -187,7 +187,7 @@ def lesson_quiz(lesson_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Lesson not found")
 
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="openai/gpt-oss-20b",
         temperature=0.3,
         response_format={"type": "json_object"},
         messages=[
