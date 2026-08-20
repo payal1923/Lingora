@@ -27,13 +27,14 @@ def generate_questions_if_needed(db: Session, client):
 
     # Generate only the required number of questions
     questions_needed = MINIMUM_QUESTION_BANK - total_questions
-    questions_to_generate = min(20, questions_needed)
+    questions_to_generate = min(5, questions_needed)
 
     response = client.chat.completions.create(
-        model="openai/gpt-oss-20b",
-        temperature=1.0,
-        max_tokens=4096,
-        messages=[
+    model="openai/gpt-oss-20b",
+    temperature=1.0,
+    max_completion_tokens=4096,
+    reasoning_effort="low",
+    messages=[
             {
                 "role": "system",
                 "content": f"""
