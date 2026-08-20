@@ -49,6 +49,7 @@ from routers.speaking import router as speaking_router
 from services.question_generator import generate_questions_if_needed
 from services.achievement_service import unlock_achievements
 from seed_lessons import seed_lessons
+from seed_vocabulary import seed_vocabulary
 
 # Schemas
 from schemas import UserCreate, UserLogin
@@ -66,6 +67,8 @@ def create_tables():
     Base.metadata.create_all(bind=engine)
     inserted_lessons = seed_lessons()
     print(f"Lessons seed complete: inserted {inserted_lessons} lessons.")
+    inserted_words = seed_vocabulary()
+    print(f"Vocabulary seed complete: inserted {inserted_words} words.")
 
 
 # --------------------------------------------------

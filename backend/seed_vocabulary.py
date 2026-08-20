@@ -1,12 +1,7 @@
-"""
-Rich vocabulary seed script.
+"""Seed the Lingora vocabulary dataset.
 
-Populates the `vocabulary` table with premium learning data:
-pronunciation, part of speech, difficulty, category, synonyms, antonyms,
-AI tips, and usage examples.
-
-Idempotent: existing words (matched by lowercased word) are updated with
-the new rich fields; new words are inserted.
+Existing words are matched case-insensitively and left unchanged. Only missing
+words are inserted, making this safe to run during every application startup.
 """
 import sys
 
@@ -524,28 +519,105 @@ WORDS = [
 ]
 
 
-def main():
+def _beginner_word(word, pronunciation, part_of_speech, meaning, example, category,
+                    synonyms="", antonyms=""):
+    """Build a complete beginner record while keeping the dataset readable."""
+    return {
+        "word": word,
+        "pronunciation": pronunciation,
+        "part_of_speech": part_of_speech,
+        "meaning": meaning,
+        "example": example,
+        "example2": f"I use the word '{word.lower()}' in everyday English.",
+        "synonyms": synonyms,
+        "antonyms": antonyms,
+        "ai_tip": f"Use '{word.lower()}' in the context of {category.lower()}.",
+        "common_mistakes": f"Check the pronunciation and spelling of '{word.lower()}'.",
+        "when_to_use": f"Use it when talking about {category.lower()}.",
+        "when_not_to_use": "Choose a more specific word when the context requires one.",
+        "natural_sentence": example,
+        "formal_sentence": f"The term '{word.lower()}' is commonly used in {category.lower()}.",
+        "informal_sentence": f"I say '{word.lower()}' a lot.",
+        "difficulty": "Beginner",
+        "category": category,
+        "xp_reward": 10,
+    }
+
+
+BEGINNER_WORDS = [
+    ("Always", "/ˈɔːl.weɪz/", "adverb", "At all times; on every occasion", "I always brush my teeth before bed.", "Daily Life", "every time", "never"),
+    ("Breakfast", "/ˈbrek.fəst/", "noun", "The first meal of the day", "I have breakfast at seven o'clock.", "Food", "morning meal", "dinner"),
+    ("Busy", "/ˈbɪz.i/", "adjective", "Having a lot to do", "I am busy this afternoon.", "Daily Life", "occupied", "free"),
+    ("Clean", "/kliːn/", "adjective", "Free from dirt", "The kitchen is clean.", "Daily Life", "tidy", "dirty"),
+    ("Close", "/kloʊz/", "verb", "To shut something", "Please close the door.", "Daily Life", "shut", "open"),
+    ("Cold", "/koʊld/", "adjective", "Having a low temperature", "The water is cold.", "Weather", "cool", "hot"),
+    ("Early", "/ˈɜːr.li/", "adverb", "Before the usual or expected time", "She arrived early for class.", "Time", "soon", "late"),
+    ("Easy", "/ˈiː.zi/", "adjective", "Not difficult to do or understand", "This exercise is easy.", "Education", "simple", "difficult"),
+    ("Family", "/ˈfæm.əl.i/", "noun", "A group of related people", "My family lives nearby.", "People", "relatives", "strangers"),
+    ("Friendly", "/ˈfrend.li/", "adjective", "Kind and pleasant toward others", "Our new neighbor is friendly.", "People", "kind", "unfriendly"),
+    ("Good", "/ɡʊd/", "adjective", "Having a positive quality", "That was a good idea.", "Daily Life", "fine", "bad"),
+    ("Help", "/help/", "verb", "To make something easier for someone", "Can you help me with this bag?", "Communication", "assist", "hinder"),
+    ("Home", "/hoʊm/", "noun", "The place where a person lives", "I am going home after work.", "Daily Life", "house", "away"),
+    ("Hungry", "/ˈhʌŋ.ɡri/", "adjective", "Needing or wanting food", "I am hungry after the walk.", "Food", "starving", "full"),
+    ("Important", "/ɪmˈpɔːr.tənt/", "adjective", "Having great value or meaning", "Practice is important for learning.", "Education", "valuable", "unimportant"),
+    ("Kind", "/kaɪnd/", "adjective", "Caring and helpful", "She is kind to everyone.", "People", "caring", "cruel"),
+    ("Late", "/leɪt/", "adjective", "Arriving or happening after the expected time", "The bus is late today.", "Time", "delayed", "early"),
+    ("Lunch", "/lʌntʃ/", "noun", "A meal eaten around the middle of the day", "We eat lunch at noon.", "Food", "midday meal", ""),
+    ("Morning", "/ˈmɔːr.nɪŋ/", "noun", "The early part of the day", "I study English in the morning.", "Time", "daybreak", "night"),
+    ("Need", "/niːd/", "verb", "To require something", "I need a glass of water.", "Communication", "require", ""),
+    ("Open", "/ˈoʊ.pən/", "verb", "To move something so it is not closed", "Open your book to page five.", "Education", "unlock", "close"),
+    ("Quick", "/kwɪk/", "adjective", "Moving or happening fast", "He took a quick shower.", "Daily Life", "fast", "slow"),
+    ("Ready", "/ˈred.i/", "adjective", "Prepared for something", "Are you ready to leave?", "Communication", "prepared", "unprepared"),
+    ("Remember", "/rɪˈmem.bər/", "verb", "To keep something in your mind", "Please remember my name.", "Education", "recall", "forget"),
+    ("Safe", "/seɪf/", "adjective", "Protected from danger or harm", "This area is safe at night.", "Daily Life", "secure", "dangerous"),
+    ("School", "/skuːl/", "noun", "A place where people learn", "My brother walks to school.", "Education", "academy", ""),
+    ("Small", "/smɔːl/", "adjective", "Not large in size", "They live in a small apartment.", "Daily Life", "little", "large"),
+    ("Start", "/stɑːrt/", "verb", "To begin doing something", "The lesson starts at nine.", "Time", "begin", "finish"),
+    ("Tired", "/taɪərd/", "adjective", "Needing rest or sleep", "I feel tired after work.", "Health", "sleepy", "energetic"),
+    ("Today", "/təˈdeɪ/", "adverb", "On this day", "I have an English class today.", "Time", "this day", "yesterday"),
+    ("Tomorrow", "/təˈmɑːr.oʊ/", "adverb", "On the day after today", "We will meet tomorrow.", "Time", "the next day", "yesterday"),
+    ("Understand", "/ˌʌn.dərˈstænd/", "verb", "To know the meaning of something", "I understand the question.", "Education", "comprehend", "misunderstand"),
+    ("Useful", "/ˈjuːs.fəl/", "adjective", "Helpful for a purpose", "These phrases are useful at work.", "Education", "helpful", "useless"),
+    ("Wait", "/weɪt/", "verb", "To stay until something happens", "Please wait for me.", "Communication", "stay", "hurry"),
+    ("Warm", "/wɔːrm/", "adjective", "Having a comfortably high temperature", "The soup is warm.", "Weather", "mild", "cool"),
+    ("Water", "/ˈwɔː.tər/", "noun", "A clear liquid that people drink", "Please drink more water.", "Food", "" , ""),
+    ("Weather", "/ˈweð.ər/", "noun", "The condition of the air outside", "The weather is sunny today.", "Weather", "climate", ""),
+    ("Weekend", "/ˌwiːkˈend/", "noun", "Saturday and Sunday", "I visit my family at the weekend.", "Time", "days off", "weekday"),
+    ("Welcome", "/ˈwel.kəm/", "adjective", "Received gladly or happily", "You are welcome in our home.", "Communication", "invited", "unwelcome"),
+    ("Work", "/wɜːrk/", "verb", "To do a job or activity", "I work in an office.", "Business", "labor", "rest"),
+    ("Yesterday", "/ˈjes.tər.deɪ/", "adverb", "On the day before today", "I called her yesterday.", "Time", "the previous day", "tomorrow"),
+]
+
+WORDS.extend(_beginner_word(*entry) for entry in BEGINNER_WORDS)
+
+
+def seed_vocabulary():
+    """Insert missing vocabulary words without changing existing records."""
     db = SessionLocal()
     try:
-        inserted = 0
-        updated = 0
-        for w in WORDS:
-            existing = (
-                db.query(Vocabulary)
-                .filter(Vocabulary.word.ilike(w["word"]))
-                .first()
-            )
-            if existing:
-                for key, value in w.items():
-                    setattr(existing, key, value)
-                updated += 1
-            else:
-                db.add(Vocabulary(**w))
-                inserted += 1
+        existing_words = {
+            word.lower()
+            for (word,) in db.query(Vocabulary.word).all()
+            if word
+        }
+        new_words = [
+            Vocabulary(**word)
+            for word in WORDS
+            if word["word"].lower() not in existing_words
+        ]
+        db.add_all(new_words)
         db.commit()
-        print(f"Seed complete: {inserted} inserted, {updated} updated, {len(WORDS)} total processed.")
+        return len(new_words)
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
+
+
+def main():
+    inserted = seed_vocabulary()
+    print(f"Vocabulary seed complete: inserted {inserted} words.")
 
 
 if __name__ == "__main__":
