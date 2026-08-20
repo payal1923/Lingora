@@ -30,7 +30,7 @@ def generate_questions_if_needed(db: Session, client):
     questions_to_generate = min(20, questions_needed)
 
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="openai/gpt-oss-20b",
         temperature=1.0,
         max_tokens=4096,
         messages=[
