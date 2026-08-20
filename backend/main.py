@@ -48,6 +48,7 @@ from routers.speaking import router as speaking_router
 # Services
 from services.question_generator import generate_questions_if_needed
 from services.achievement_service import unlock_achievements
+from seed_lessons import seed_lessons
 
 # Schemas
 from schemas import UserCreate, UserLogin
@@ -63,6 +64,8 @@ app = FastAPI()
 @app.on_event("startup")
 def create_tables():
     Base.metadata.create_all(bind=engine)
+    inserted_lessons = seed_lessons()
+    print(f"Lessons seed complete: inserted {inserted_lessons} lessons.")
 
 
 # --------------------------------------------------
