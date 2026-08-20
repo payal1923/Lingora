@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import lingoraLogo from "../assets/lingora-logo.png";
+import lingoraLogo from "../assets/Lingora-logo.png";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");

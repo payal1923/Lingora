@@ -12,7 +12,7 @@
 // inspired by the "premium AI tutor" feeling — not a copy of any product.
 
 import { useEffect, useMemo } from "react";
-import VoiceWave from "../Components/VoiceWave";
+import VoiceWave from "./VoiceWave";
 
 const STYLE_ID = "lingora-aitutor-styles";
 

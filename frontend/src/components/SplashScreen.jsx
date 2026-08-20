@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import lingoraLogo from "../assets/lingora-logo.png";
+import lingoraLogo from "../assets/Lingora-logo.png";
 
 const SplashScreen = ({ onFinish }) => {
     useEffect(() => {
