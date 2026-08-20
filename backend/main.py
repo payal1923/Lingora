@@ -54,17 +54,15 @@ from schemas import UserCreate, UserLogin
 from schemas_learned import LearnedWordCreate
 
 # --------------------------------------------------
-# DATABASE
-# --------------------------------------------------
-
-Base.metadata.create_all(bind=engine)
-
-
-# --------------------------------------------------
 # FASTAPI
 # --------------------------------------------------
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def create_tables():
+    Base.metadata.create_all(bind=engine)
 
 
 # --------------------------------------------------
