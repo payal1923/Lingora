@@ -216,7 +216,7 @@ Do NOT wrap the response inside another JSON object.
     messages.extend(history)
 
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="openai/gpt-oss-20b",
         temperature=0.7,
         response_format={"type": "json_object"},
         messages=messages,
