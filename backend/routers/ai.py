@@ -16,7 +16,7 @@ def ai_chat(data: dict):
         raise HTTPException(status_code=400, detail="Message is required")
 
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="openai/gpt-oss-20b",
         temperature=0,
         response_format={"type": "json_object"},
         messages=[
