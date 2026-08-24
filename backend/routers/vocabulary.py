@@ -1,20 +1,104 @@
 import random
 from datetime import date, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
+import json
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from database import get_db
 
 from models_vocabulary import Vocabulary
+from models_vocabulary_search_history import VocabularySearchHistory
 from models_learned import LearnedWord
 from models_favorite import FavoriteWord
 from models import User
 
 from schemas_learned import LearnedWordCreate
 from schemas_favorite import FavoriteWordCreate
+from schemas_vocabulary import VocabularyResponse
+
+from config import client
 
 router = APIRouter(tags=["Vocabulary"])
+
+
+REQUIRED_AI_FIELDS = {"word", "pronunciation", "part_of_speech", "meaning", "example"}
+
+
+def generate_vocabulary_with_ai(word: str):
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        temperature=0,
+        response_format={"type": "json_object"},
+        messages=[
+            {
+                "role": "system",
+                "content": """
+You are Lingora Vocabulary Generator.
+
+You generate accurate English word entries for language learners.
+
+Return ONLY a valid JSON object with EXACTLY these five keys:
+- word: string (the queried word, same case as input)
+- pronunciation: string (IPA-like pronunciation)
+- part_of_speech: string (e.g. noun, verb, adjective)
+- meaning: string (clear, concise definition)
+- example: string (natural usage example sentence)
+
+Rules:
+- Do NOT include any other keys.
+- Do NOT wrap the JSON in another object.
+- Do NOT return markdown, code blocks, or extra text.
+- All values must be non-empty strings.
+- The word value must exactly match the user's queried word.
+""",
+            },
+            {
+                "role": "user",
+                "content": f"Generate vocabulary entry for: {word}",
+            },
+        ],
+    )
+
+    reply = response.choices[0].message.content.strip()
+
+    try:
+        result = json.loads(reply)
+    except Exception:
+        raise HTTPException(
+            status_code=502,
+            detail="Invalid AI response: malformed JSON",
+        )
+
+    if not isinstance(result, dict):
+        raise HTTPException(
+            status_code=502,
+            detail="Invalid AI response: not a JSON object",
+        )
+
+    missing = REQUIRED_AI_FIELDS - set(result.keys())
+    if missing:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Invalid AI response: missing fields {missing}",
+        )
+
+    for field in REQUIRED_AI_FIELDS:
+        value = result.get(field)
+        if not isinstance(value, str) or not value.strip():
+            raise HTTPException(
+                status_code=502,
+                detail=f"Invalid AI response: field '{field}' is empty or invalid",
+            )
+
+    if result["word"].strip().lower() != word.strip().lower():
+        raise HTTPException(
+            status_code=502,
+            detail="Invalid AI response: word field does not match query",
+        )
+
+    return result
 
 # --------------------------------------------------
 # GET VOCABULARY (existing - kept intact)
@@ -25,6 +109,136 @@ router = APIRouter(tags=["Vocabulary"])
 def get_vocabulary(db: Session = Depends(get_db)):
 
     return db.query(Vocabulary).all()
+
+
+# --------------------------------------------------
+# VOCABULARY SEARCH (AI-powered lookup)
+# --------------------------------------------------
+
+
+@router.get("/vocabulary/search", response_model=VocabularyResponse)
+def vocabulary_search(
+    word: str = Query(..., min_length=1, max_length=100),
+    db: Session = Depends(get_db),
+):
+
+    normalized = word.strip().lower()
+
+    if not normalized:
+        raise HTTPException(
+            status_code=400,
+            detail="Word must not be empty",
+        )
+
+    existing = (
+        db.query(Vocabulary)
+        .filter(Vocabulary.normalized_word == normalized)
+        .first()
+    )
+
+    if existing:
+        return existing
+
+    generated = generate_vocabulary_with_ai(word.strip())
+
+    db_word = Vocabulary(
+        word=generated["word"].strip(),
+        normalized_word=generated["word"].strip().lower(),
+        pronunciation=generated["pronunciation"].strip(),
+        part_of_speech=generated["part_of_speech"].strip(),
+        meaning=generated["meaning"].strip(),
+        example=generated["example"].strip(),
+        xp_reward=10,
+    )
+
+    try:
+        db.add(db_word)
+        db.commit()
+        db.refresh(db_word)
+    except Exception:
+        db.rollback()
+        existing_after_fail = (
+            db.query(Vocabulary)
+            .filter(Vocabulary.normalized_word == normalized)
+            .first()
+        )
+        if existing_after_fail:
+            return existing_after_fail
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to persist generated vocabulary",
+        )
+
+    return db_word
+
+
+# --------------------------------------------------
+# VOCABULARY SEARCH HISTORY
+# --------------------------------------------------
+
+
+@router.post("/vocabulary/search-history")
+def add_vocabulary_search_history(data: dict, db: Session = Depends(get_db)):
+
+    user_id = data.get("user_id")
+    vocabulary_id = data.get("vocabulary_id")
+
+    if user_id is None or vocabulary_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="user_id and vocabulary_id are required",
+        )
+
+    existing = (
+        db.query(VocabularySearchHistory)
+        .filter(
+            VocabularySearchHistory.user_id == user_id,
+            VocabularySearchHistory.vocabulary_id == vocabulary_id,
+        )
+        .first()
+    )
+
+    if existing:
+        return {"message": "Already in search history"}
+
+    db.add(
+        VocabularySearchHistory(
+            user_id=user_id,
+            vocabulary_id=vocabulary_id,
+        )
+    )
+    db.commit()
+
+    return {"message": "Added to search history"}
+
+
+@router.get("/vocabulary/search-history/{user_id}")
+def get_vocabulary_search_history(user_id: int, db: Session = Depends(get_db)):
+
+    rows = (
+        db.query(VocabularySearchHistory)
+        .filter(VocabularySearchHistory.user_id == user_id)
+        .order_by(VocabularySearchHistory.searched_at.desc())
+        .all()
+    )
+
+    vocabulary_ids = [row.vocabulary_id for row in rows]
+
+    words = (
+        db.query(Vocabulary)
+        .filter(Vocabulary.id.in_(vocabulary_ids))
+        .all()
+    )
+
+    word_map = {w.id: w for w in words}
+
+    result = []
+    for row in rows:
+        word = word_map.get(row.vocabulary_id)
+        if word:
+            result.append(word)
+
+    return result
 
 
 # --------------------------------------------------

@@ -1,79 +1,65 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_URL from "../config/api";
 
-import VocabularyHero from "../components/vocabulary/VocabularyHero";
-import VocabularyProgress from "../components/vocabulary/VocabularyProgress";
-import VocabularySearchBar from "../components/vocabulary/VocabularySearchBar";
-import VocabularyFilterBar from "../components/vocabulary/VocabularyFilterBar";
-import VocabularyCard from "../components/vocabulary/VocabularyCard";
+import DictionarySearchBar from "../components/vocabulary/DictionarySearchBar";
+import DictionaryCard from "../components/vocabulary/DictionaryCard";
 import FlashcardModal from "../components/vocabulary/FlashcardModal";
 import VocabQuizModal from "../components/vocabulary/VocabQuizModal";
 import FavoriteDrawer from "../components/vocabulary/FavoriteDrawer";
 
 export default function Vocabulary() {
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     const userId = user?.user_id ?? user?.id;
 
-    const [words, setWords] = useState([]);
-    const [wordOfDay, setWordOfDay] = useState(null);
-    const [dashboard, setDashboard] = useState(null);
-    const [learnedMap, setLearnedMap] = useState({}); // { vocabId: status }
-    const [favoriteIds, setFavoriteIds] = useState([]);
-
-    const [search, setSearch] = useState("");
-    const [filter, setFilter] = useState("All");
-
-    const [loading, setLoading] = useState(true);
+    const [query, setQuery] = useState("");
+    const [searchedWords, setSearchedWords] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchError, setSearchError] = useState(null);
     const [showFlashcards, setShowFlashcards] = useState(false);
     const [showQuiz, setShowQuiz] = useState(false);
     const [showFavorites, setShowFavorites] = useState(false);
     const [toast, setToast] = useState(null);
 
+    const [learnedMap, setLearnedMap] = useState({});
+    const [favoriteIds, setFavoriteIds] = useState([]);
+
     // --------------------------------------------------
-    // Load all data
+    // Load favorites + learned state + search history
     // --------------------------------------------------
     useEffect(() => {
-        const loadAll = async () => {
+        const loadMeta = async () => {
             try {
-                const [vocabRes, wodRes, dashRes, learnedRes, favRes] =
-                    await Promise.all([
-                        axios.get(`${API_URL}/vocabulary`),
-                        axios.get(`${API_URL}/word-of-the-day`),
-                        userId
-                            ? axios.get(`${API_URL}/vocabulary-dashboard/${userId}`)
-                            : Promise.resolve({ data: null }),
-                        userId
-                            ? axios.get(`${API_URL}/learned-words/${userId}`)
-                            : Promise.resolve({ data: { learned_words: [] } }),
-                        userId
-                            ? axios.get(`${API_URL}/favorite-words/${userId}`)
-                            : Promise.resolve({ data: { favorite_ids: [] } }),
-                    ]);
-
-                setWords(vocabRes.data || []);
-                setWordOfDay(wodRes.data || null);
-                setDashboard(dashRes.data || null);
+                const [learnedRes, favRes, historyRes] = await Promise.all([
+                    userId
+                        ? axios.get(`${API_URL}/learned-words/${userId}`)
+                        : Promise.resolve({ data: { learned_words: [] } }),
+                    userId
+                        ? axios.get(`${API_URL}/favorite-words/${userId}`)
+                        : Promise.resolve({ data: { favorite_ids: [] } }),
+                    userId
+                        ? axios.get(`${API_URL}/vocabulary/search-history/${userId}`)
+                        : Promise.resolve({ data: [] }),
+                ]);
 
                 const lMap = {};
                 (learnedRes.data.learned_words || []).forEach((lw) => {
                     lMap[lw.vocabulary_id] = lw.status || "Learning";
                 });
                 setLearnedMap(lMap);
-
                 setFavoriteIds(favRes.data.favorite_ids || []);
+
+                const history = historyRes.data || [];
+                setSearchedWords(history);
             } catch (err) {
-                console.log("Vocabulary load error:", err);
-            } finally {
-                setLoading(false);
+                console.log("Vocabulary meta load error:", err);
             }
         };
 
-        loadAll();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        loadMeta();
+    }, [userId]);
 
     // --------------------------------------------------
     // Toast helper
@@ -92,7 +78,6 @@ export default function Vocabulary() {
             return;
         }
         const isFav = favoriteIds.includes(wordId);
-        // Optimistic UI
         setFavoriteIds((prev) =>
             isFav ? prev.filter((id) => id !== wordId) : [...prev, wordId]
         );
@@ -110,7 +95,6 @@ export default function Vocabulary() {
                 showToast("Saved to your words ⭐");
             }
         } catch {
-            // Revert on error
             setFavoriteIds((prev) =>
                 isFav ? [...prev, wordId] : prev.filter((id) => id !== wordId)
             );
@@ -119,10 +103,62 @@ export default function Vocabulary() {
     };
 
     // --------------------------------------------------
-    // Learning status
+    // Search handler
+    // --------------------------------------------------
+    const handleSearch = async (rawWord) => {
+        const normalized = rawWord.trim().toLowerCase();
+        if (!normalized) return;
+
+        setLoading(true);
+        setSearchError(null);
+
+        try {
+            const res = await axios.get(
+                `${API_URL}/vocabulary/search?word=${encodeURIComponent(rawWord)}`
+            );
+
+            const word = res.data;
+
+            if (!word || !word.id) {
+                setSearchError("Word not found. Please try another word.");
+                return;
+            }
+
+            setSearchedWords((prev) => {
+                const exists = prev.some(
+                    (w) => w.normalized_word === word.normalized_word
+                );
+                if (exists) return prev;
+                return [word, ...prev];
+            });
+
+            setQuery("");
+
+            if (userId) {
+                try {
+                    await axios.post(`${API_URL}/vocabulary/search-history`, {
+                        user_id: userId,
+                        vocabulary_id: word.id,
+                    });
+                } catch (historyErr) {
+                    console.log("Search history save error:", historyErr);
+                }
+            }
+        } catch (err) {
+            console.log("Vocabulary search error:", err);
+            setSearchError(
+                err.response?.data?.detail ||
+                "Could not fetch word. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // --------------------------------------------------
+    // Learning status (preserved for modal flows)
     // --------------------------------------------------
     const handleStatusChange = async (wordId, newStatus) => {
-        // Optimistic UI
         setLearnedMap((prev) => ({ ...prev, [wordId]: newStatus }));
         if (!userId) {
             showToast("Please log in to track progress.");
@@ -135,17 +171,14 @@ export default function Vocabulary() {
                 status: newStatus,
             });
 
-            // If marking as Mastered, award XP
             if (newStatus === "Mastered") {
-                const word = words.find((w) => w.id === wordId);
+                const word = searchedWords.find((w) => w.id === wordId);
                 const xpAmount = word?.xp_reward || 10;
                 await axios.post(`${API_URL}/vocabulary-award-xp`, {
                     user_id: userId,
                     xp_amount: xpAmount,
                 });
                 showToast(`Mastered! +${xpAmount} XP 🎉`);
-                // Refresh dashboard to reflect new XP
-                refreshDashboard();
             } else {
                 showToast(`Status: ${newStatus}`);
             }
@@ -155,28 +188,9 @@ export default function Vocabulary() {
         }
     };
 
-    const refreshDashboard = async () => {
-        if (!userId) return;
-        try {
-            const res = await axios.get(
-                `${API_URL}/vocabulary-dashboard/${userId}`
-            );
-            setDashboard(res.data);
-        } catch (err) {
-            console.log("Dashboard refresh error:", err);
-        }
-    };
-
     // --------------------------------------------------
     // Practice entry point
     // --------------------------------------------------
-    // Starting practice on a word should automatically move it from
-    // "New" into "Learning" (and thus into Learned Words), reusing the
-    // existing handleStatusChange/update-word-status logic so there's
-    // no duplicate API call and no separate XP path. Words already
-    // past "New" (Learning / Mastered / Reviewed) are left untouched —
-    // re-practicing shouldn't regress their progress or fire an
-    // unnecessary status update.
     const handlePracticeStart = (wordId) => {
         if (wordId == null) {
             setShowFlashcards(true);
@@ -190,43 +204,16 @@ export default function Vocabulary() {
     };
 
     // --------------------------------------------------
-    // Filtering + search
+    // Loading state (initial page load only)
     // --------------------------------------------------
-    const filteredWords = useMemo(() => {
-        const q = search.trim().toLowerCase();
-        return words.filter((w) => {
-            // Search across word, meaning, category, difficulty
-            if (q) {
-                const haystack = [
-                    w.word,
-                    w.meaning,
-                    w.category,
-                    w.difficulty,
-                ]
-                    .filter(Boolean)
-                    .join(" ")
-                    .toLowerCase();
-                if (!haystack.includes(q)) return false;
-            }
-            // Filter
-            if (filter === "All") return true;
-            const difficulties = ["Beginner", "Intermediate", "Advanced"];
-            if (difficulties.includes(filter)) {
-                return w.difficulty === filter;
-            }
-            return w.category === filter;
-        });
-    }, [words, search, filter]);
+    const [initialLoading, setInitialLoading] = useState(true);
 
-    const favoriteWords = useMemo(
-        () => words.filter((w) => favoriteIds.includes(w.id)),
-        [words, favoriteIds]
-    );
+    useEffect(() => {
+        const timer = setTimeout(() => setInitialLoading(false), 0);
+        return () => clearTimeout(timer);
+    }, []);
 
-    // --------------------------------------------------
-    // Loading state
-    // --------------------------------------------------
-    if (loading) {
+    if (initialLoading) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-50">
                 <div className="text-center">
@@ -243,25 +230,25 @@ export default function Vocabulary() {
     // Render
     // --------------------------------------------------
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/40">
-            <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 md:py-8">
+        <div className="min-h-screen bg-slate-50">
+            <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
                 {/* Page header */}
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <button
                             type="button"
                             onClick={() => navigate("/dashboard")}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl text-slate-700 shadow-sm transition hover:bg-slate-100"
+                            className="touch-target flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl text-slate-700 shadow-sm transition hover:bg-slate-100"
                             aria-label="Back to dashboard"
                         >
                             ←
                         </button>
                         <div>
-                            <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
+                            <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
                                 Vocabulary
                             </h1>
                             <p className="mt-0.5 text-sm text-slate-500">
-                                Learn, practice and master new English words.
+                                Look up any English word
                             </p>
                         </div>
                     </div>
@@ -269,7 +256,7 @@ export default function Vocabulary() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setShowFavorites(true)}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 active:scale-95"
+                            className="touch-target inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 active:scale-95"
                         >
                             ⭐ <span className="hidden sm:inline">Saved</span>
                             <span className="rounded-full bg-amber-100 px-1.5 text-xs text-amber-700">
@@ -279,107 +266,71 @@ export default function Vocabulary() {
                     </div>
                 </div>
 
-                {/* Hero - Word of the Day */}
+                {/* Search */}
                 <div className="mt-6">
-                    <VocabularyHero
-                        word={wordOfDay}
-                        onPractice={() =>
-                            wordOfDay && handlePracticeStart(wordOfDay.id)
-                        }
-                        onSave={() => wordOfDay && toggleFavorite(wordOfDay.id)}
-                        saved={wordOfDay ? favoriteIds.includes(wordOfDay.id) : false}
+                    <DictionarySearchBar
+                        value={query}
+                        onChange={setQuery}
+                        onSearch={handleSearch}
+                        loading={loading}
                     />
                 </div>
 
-                {/* Progress */}
-                {dashboard && (
-                    <div className="mt-6">
-                        <VocabularyProgress data={dashboard} />
+                {/* Error state */}
+                {searchError && (
+                    <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-center">
+                        <p className="text-sm font-medium text-rose-700">
+                            {searchError}
+                        </p>
+                        <button
+                            onClick={() => setSearchError(null)}
+                            className="mt-2 text-sm font-semibold text-rose-600 transition hover:text-rose-700"
+                        >
+                            Dismiss
+                        </button>
                     </div>
                 )}
 
-                {/* Daily challenge + practice actions */}
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                    <ActionTile
-                        icon="🃏"
-                        title="Practice Flashcards"
-                        desc="Flip cards to study words"
-                        onClick={() => setShowFlashcards(true)}
-                        color="from-indigo-500 to-blue-500"
-                    />
-                    <ActionTile
-                        icon="🧠"
-                        title="Quick Vocabulary Quiz"
-                        desc="Test yourself & earn XP"
-                        onClick={() => setShowQuiz(true)}
-                        color="from-emerald-500 to-teal-500"
-                    />
-                    <ActionTile
-                        icon="🎯"
-                        title="Today's Goal"
-                        desc="Learn 5 new words today"
-                        onClick={() => {
-                            setFilter("All");
-                            setSearch("");
-                            showToast("Let's learn 5 words today! 💪");
-                        }}
-                        color="from-amber-500 to-orange-500"
-                    />
-                </div>
-
-                {/* Search + Filters */}
-                <div className="mt-8 space-y-4">
-                    <VocabularySearchBar value={search} onChange={setSearch} />
-                    <VocabularyFilterBar active={filter} onChange={setFilter} />
-                </div>
-
-                {/* Results count */}
-                <div className="mt-4 flex items-center justify-between">
-                    <p className="text-sm text-slate-500">
-                        {filteredWords.length} word
-                        {filteredWords.length !== 1 ? "s" : ""} found
-                    </p>
-                    {(search || filter !== "All") && (
-                        <button
-                            onClick={() => {
-                                setSearch("");
-                                setFilter("All");
-                            }}
-                            className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
-                        >
-                            Clear filters
-                        </button>
-                    )}
-                </div>
-
-                {/* Vocabulary grid */}
-                {filteredWords.length === 0 ? (
+                {/* Empty state */}
+                {!loading && searchedWords.length === 0 && !searchError && (
                     <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/60 py-16 text-center">
-                        <span className="text-5xl">🔍</span>
+                        <span className="text-5xl">📖</span>
                         <p className="mt-3 font-semibold text-slate-600">
-                            No words match your search.
+                            Start by searching a word
                         </p>
                         <p className="mt-1 text-sm text-slate-400">
-                            Try a different word or filter.
+                            Type any English word above and press Enter or tap Search.
                         </p>
                     </div>
-                ) : (
-                    <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                        {filteredWords.map((word) => (
-                            <VocabularyCard
-                                key={word.id}
-                                word={word}
-                                status={learnedMap[word.id] || null}
-                                favorited={favoriteIds.includes(word.id)}
-                                onFavorite={toggleFavorite}
-                                onStatusChange={handleStatusChange}
-                                onPractice={() => {
-                                    // Practice a single word via flashcards.
-                                    // Starting practice moves New -> Learning.
-                                    handlePracticeStart(word.id);
-                                }}
-                            />
-                        ))}
+                )}
+
+                {/* Dictionary cards - newest first */}
+                <div className="mt-6 space-y-4">
+                    {searchedWords.map((word) => (
+                        <DictionaryCard
+                            key={word.normalized_word}
+                            word={word}
+                            favorited={favoriteIds.includes(word.id)}
+                            onFavorite={toggleFavorite}
+                        />
+                    ))}
+                </div>
+
+                {/* Practice shortcuts when cards exist */}
+                {searchedWords.length > 0 && (
+                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                        <button
+                            onClick={() => setShowFlashcards(true)}
+                            className="touch-target flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95"
+                        >
+                            🃏 Practice Flashcards
+                        </button>
+                        <button
+                            onClick={() => setShowQuiz(true)}
+                            className="touch-target flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95"
+                        >
+                            🧠 Quick Quiz
+                        </button>
                     </div>
                 )}
             </main>
@@ -387,7 +338,7 @@ export default function Vocabulary() {
             {/* Modals & Drawers */}
             {showFlashcards && (
                 <FlashcardModal
-                    words={filteredWords.length > 0 ? filteredWords : words}
+                    words={searchedWords}
                     onClose={() => setShowFlashcards(false)}
                 />
             )}
@@ -396,13 +347,14 @@ export default function Vocabulary() {
                 <VocabQuizModal
                     userId={userId}
                     onClose={() => setShowQuiz(false)}
-                    onXpEarned={() => refreshDashboard()}
                 />
             )}
 
             <FavoriteDrawer
                 open={showFavorites}
-                favorites={favoriteWords}
+                favorites={searchedWords.filter((w) =>
+                    favoriteIds.includes(w.id)
+                )}
                 onClose={() => setShowFavorites(false)}
                 onRemove={(wordId) => toggleFavorite(wordId)}
             />
@@ -416,26 +368,5 @@ export default function Vocabulary() {
                 </div>
             )}
         </div>
-    );
-}
-
-function ActionTile({ icon, title, desc, onClick, color }) {
-    return (
-        <button
-            onClick={onClick}
-            className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
-        >
-            <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${color} text-2xl shadow-sm transition-transform duration-300 group-hover:scale-110`}
-            >
-                {icon}
-            </div>
-            <div className="min-w-0">
-                <h3 className="truncate text-sm font-bold text-slate-800">
-                    {title}
-                </h3>
-                <p className="truncate text-xs text-slate-500">{desc}</p>
-            </div>
-        </button>
     );
 }

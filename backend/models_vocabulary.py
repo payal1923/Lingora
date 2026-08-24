@@ -7,6 +7,7 @@ class Vocabulary(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     word = Column(String, nullable=False)
+    normalized_word = Column(String, nullable=False)
     pronunciation = Column(String, nullable=True)
     part_of_speech = Column(String, nullable=True)
     meaning = Column(String, nullable=False)

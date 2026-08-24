@@ -69,6 +69,7 @@ def main():
         "difficulty": "VARCHAR DEFAULT 'Beginner'",
         "category": "VARCHAR DEFAULT 'Daily Life'",
         "xp_reward": "INTEGER DEFAULT 10",
+        "normalized_word": "VARCHAR",
     }
     for col, col_type in vocab_columns.items():
         add_column("vocabulary", col, col_type)
@@ -132,6 +133,63 @@ def main():
         print("  + Backfill complete")
     finally:
         db.close()
+
+    # Backfill normalized_word for existing vocabulary rows
+    print("\n[Backfill] Populating normalized_word for vocabulary...")
+    db = SessionLocal()
+    try:
+        db.execute(
+            text(
+                "UPDATE vocabulary "
+                "SET normalized_word = LOWER(TRIM(word)) "
+                "WHERE normalized_word IS NULL"
+            )
+        )
+        db.commit()
+        print("  + normalized_word backfill complete")
+    finally:
+        db.close()
+
+    # Create unique index on normalized_word if it does not exist
+    print("\n[Index] Creating unique index on vocabulary.normalized_word...")
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS "
+                "uq_vocabulary_normalized_word "
+                "ON vocabulary (normalized_word)"
+            )
+        )
+    print("  + Unique index created")
+
+    # --------------------------------------------------
+    # vocabulary_search_history table
+    # --------------------------------------------------
+    print("\n[4/4] Ensuring `vocabulary_search_history` table exists...")
+    if table_exists("vocabulary_search_history"):
+        print("  - vocabulary_search_history already exists, skipping")
+    else:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    CREATE TABLE vocabulary_search_history (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER REFERENCES users(id),
+                        vocabulary_id INTEGER REFERENCES vocabulary(id),
+                        searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                    """
+                )
+            )
+            conn.execute(
+                text(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS "
+                    "uq_vocabulary_search_history_user_vocab "
+                    "ON vocabulary_search_history (user_id, vocabulary_id)"
+                )
+            )
+        print("  + vocabulary_search_history table created")
 
     print("\n=== Migration complete ===")
 

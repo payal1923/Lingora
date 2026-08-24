@@ -11,6 +11,7 @@ from database import Base, engine, get_db
 import models
 import models_result
 import models_vocabulary
+import models_vocabulary_search_history
 import models_learned
 import models_daily
 import models_achievement
