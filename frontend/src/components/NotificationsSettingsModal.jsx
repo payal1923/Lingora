@@ -8,6 +8,7 @@
 // unlocks, Weekly progress. Plus a reminder-time picker.
 
 import { useState } from "react";
+import useModalBehavior from "../Hooks/useModalBehavior";
 import {
     getPreference,
     setPreference,
@@ -55,6 +56,8 @@ export default function NotificationsSettingsModal({ open, onClose }) {
         return saved;
     });
 
+    useModalBehavior(open, onClose);
+
     if (!open) return null;
 
     const toggleItem = (key) => {
@@ -87,14 +90,14 @@ export default function NotificationsSettingsModal({ open, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center sm:px-4">
+        <div className="mobile-modal-backdrop fixed inset-0 z-[110] flex items-end justify-center sm:items-center sm:px-4">
             <button
                 type="button"
                 aria-label="Close notification settings"
                 onClick={onClose}
                 className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
             />
-            <div className="relative z-10 w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white border border-slate-200 shadow-2xl pb-[env(safe-area-inset-bottom)]">
+            <div role="dialog" aria-modal="true" aria-label="Notification Settings" className="mobile-modal-panel relative z-10 w-full max-w-lg rounded-t-3xl border border-slate-200 bg-white shadow-2xl sm:rounded-3xl">
                 <div className="sm:hidden sticky top-0 z-10 flex justify-center bg-white pt-3 pb-2">
                     <span className="h-1.5 w-10 rounded-full bg-slate-200" />
                 </div>
@@ -113,7 +116,7 @@ export default function NotificationsSettingsModal({ open, onClose }) {
                             type="button"
                             onClick={onClose}
                             aria-label="Close"
-                            className="flex h-9 w-9 min-h-[36px] min-w-[36px] items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition cursor-pointer touch-manipulation"
+                            className="touch-target flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition cursor-pointer touch-manipulation"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -141,9 +144,9 @@ export default function NotificationsSettingsModal({ open, onClose }) {
                                     key={t}
                                     type="button"
                                     onClick={() => handleTime(t)}
-                                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition touch-manipulation cursor-pointer ${reminderTime === t
-                                            ? "bg-indigo-600 text-white"
-                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                    className={`touch-target rounded-full px-3 py-1.5 text-xs font-semibold transition touch-manipulation cursor-pointer ${reminderTime === t
+                                        ? "bg-indigo-600 text-white"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                         }`}
                                 >
                                     {formatTime(t)}

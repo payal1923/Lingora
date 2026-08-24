@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useVocabSpeech from "../../Hooks/useVocabSpeech";
+import useModalBehavior from "../../Hooks/useModalBehavior";
 
 /**
  * FlashcardModal
@@ -15,6 +16,7 @@ import useVocabSpeech from "../../Hooks/useVocabSpeech";
  */
 export default function FlashcardModal({ words, onClose }) {
     const { speak, speakSlow } = useVocabSpeech();
+    useModalBehavior(true, onClose);
     const [index, setIndex] = useState(0);
     const [flipped, setFlipped] = useState(false);
     const [knownCount, setKnownCount] = useState(0);
@@ -61,7 +63,7 @@ export default function FlashcardModal({ words, onClose }) {
                 </div>
                 <button
                     onClick={onClose}
-                    className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                    className="touch-target flex items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
                     aria-label="Close flashcards"
                 >
                     ✕
@@ -153,7 +155,7 @@ export default function FlashcardModal({ words, onClose }) {
                         e.stopPropagation();
                         speak(word.word);
                     }}
-                    className="rounded-xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100"
+                    className="touch-target rounded-xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100"
                 >
                     🔊 Listen
                 </button>
@@ -162,7 +164,7 @@ export default function FlashcardModal({ words, onClose }) {
                         e.stopPropagation();
                         speakSlow(word.word);
                     }}
-                    className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-200"
+                    className="touch-target rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-200"
                 >
                     🐢 Slow
                 </button>
@@ -173,14 +175,14 @@ export default function FlashcardModal({ words, onClose }) {
                 <button
                     onClick={prev}
                     disabled={index === 0}
-                    className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+                    className="touch-target rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
                 >
                     ← Prev
                 </button>
 
                 <button
                     onClick={markKnown}
-                    className="rounded-xl bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 active:scale-95"
+                    className="touch-target rounded-xl bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 active:scale-95"
                 >
                     ✓ I know this
                 </button>
@@ -188,7 +190,7 @@ export default function FlashcardModal({ words, onClose }) {
                 <button
                     onClick={next}
                     disabled={isLast}
-                    className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+                    className="touch-target rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
                 >
                     Next →
                 </button>
@@ -206,11 +208,11 @@ export default function FlashcardModal({ words, onClose }) {
 function ModalShell({ onClose, children }) {
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+            className="mobile-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
             onClick={onClose}
         >
             <div
-                className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl"
+                className="mobile-modal-panel w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
                 {children}

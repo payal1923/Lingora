@@ -4,6 +4,7 @@
 // Stores the visibility preference in the shared preferences module.
 
 import { useState } from "react";
+import useModalBehavior from "../Hooks/useModalBehavior";
 import { getPreference, setPreference } from "../config/preferences";
 
 const OPTIONS = [
@@ -28,6 +29,8 @@ export default function PrivacySettingsModal({ open, onClose }) {
         return saved;
     });
 
+    useModalBehavior(open, onClose);
+
     if (!open) return null;
 
     const handleVisibility = (key) => {
@@ -44,14 +47,14 @@ export default function PrivacySettingsModal({ open, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center sm:px-4">
+        <div className="mobile-modal-backdrop fixed inset-0 z-[110] flex items-end justify-center sm:items-center sm:px-4">
             <button
                 type="button"
                 aria-label="Close privacy settings"
                 onClick={onClose}
                 className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
             />
-            <div className="relative z-10 w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white border border-slate-200 shadow-2xl pb-[env(safe-area-inset-bottom)]">
+            <div role="dialog" aria-modal="true" aria-label="Privacy Settings" className="mobile-modal-panel relative z-10 w-full max-w-lg rounded-t-3xl border border-slate-200 bg-white shadow-2xl sm:rounded-3xl">
                 <div className="sm:hidden sticky top-0 z-10 flex justify-center bg-white pt-3 pb-2">
                     <span className="h-1.5 w-10 rounded-full bg-slate-200" />
                 </div>
@@ -70,7 +73,7 @@ export default function PrivacySettingsModal({ open, onClose }) {
                             type="button"
                             onClick={onClose}
                             aria-label="Close"
-                            className="flex h-9 w-9 min-h-[36px] min-w-[36px] items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition cursor-pointer touch-manipulation"
+                            className="touch-target flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition cursor-pointer touch-manipulation"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -88,8 +91,8 @@ export default function PrivacySettingsModal({ open, onClose }) {
                                     type="button"
                                     onClick={() => handleVisibility(opt.key)}
                                     className={`w-full flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 touch-manipulation min-h-[52px] cursor-pointer ${isSelected
-                                            ? "border-indigo-500 bg-indigo-50/70 ring-1 ring-indigo-200"
-                                            : "border-slate-200 bg-white hover:bg-slate-50"
+                                        ? "border-indigo-500 bg-indigo-50/70 ring-1 ring-indigo-200"
+                                        : "border-slate-200 bg-white hover:bg-slate-50"
                                         }`}
                                 >
                                     <span className="text-xl flex-shrink-0">{opt.icon}</span>

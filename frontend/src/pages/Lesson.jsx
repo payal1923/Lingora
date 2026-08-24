@@ -335,21 +335,21 @@ export default function Lesson() {
 
     return (
 
-        <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 py-10">
+        <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 py-4 sm:py-10">
 
-            <div className="max-w-5xl mx-auto px-6">
+            <div className="mx-auto min-w-0 max-w-5xl px-3 sm:px-6">
 
-                <div className="bg-white rounded-3xl shadow-2xl p-10">                    {/* ======================================
+                <div className="min-w-0 bg-white rounded-3xl shadow-2xl p-4 sm:p-10">                    {/* ======================================
                             LESSON HEADER
                     ====================================== */}
 
-                    <h1 className="text-5xl font-bold text-blue-600">
+                    <h1 className="break-words text-2xl font-bold text-blue-600 sm:text-5xl">
 
                         📖 {lesson.title}
 
                     </h1>
 
-                    <div className="mt-5 flex items-center gap-4">
+                    <div className="mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
 
                         <span className="bg-yellow-100 text-yellow-700 px-5 py-2 rounded-xl font-bold">
 
@@ -369,17 +369,17 @@ export default function Lesson() {
                             EXPLANATION
                     ====================================== */}
 
-                    <div className="mt-12">
+                    <div className="mt-8 sm:mt-12">
 
-                        <h2 className="text-3xl font-bold">
+                        <h2 className="text-xl font-bold sm:text-3xl">
 
                             📚 Explanation
 
                         </h2>
 
-                        <div className="mt-5 bg-slate-50 rounded-2xl border p-6">
+                        <div className="mt-5 bg-slate-50 rounded-2xl border p-4 sm:p-6">
 
-                            <p className="text-lg leading-8 text-slate-700">
+                            <p className="break-words text-base leading-7 text-slate-700 sm:text-lg sm:leading-8">
 
                                 {lesson.explanation}
 
@@ -393,9 +393,9 @@ export default function Lesson() {
                             EXAMPLES
                     ====================================== */}
 
-                    <div className="mt-12">
+                    <div className="mt-8 sm:mt-12">
 
-                        <h2 className="text-3xl font-bold">
+                        <h2 className="text-xl font-bold sm:text-3xl">
 
                             💬 Examples
 
@@ -409,19 +409,19 @@ export default function Lesson() {
 
                                     key={index}
 
-                                    className="bg-blue-50 border-l-4 border-blue-500 rounded-2xl p-5"
+                                    className="min-w-0 bg-blue-50 border-l-4 border-blue-500 rounded-2xl p-4 sm:p-5"
 
                                 >
 
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-start gap-3 sm:items-center sm:gap-4">
 
-                                        <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500 font-bold text-white">
 
                                             {index + 1}
 
                                         </div>
 
-                                        <p className="text-lg">
+                                        <p className="min-w-0 break-words text-base sm:text-lg">
 
                                             {example}
 
@@ -441,17 +441,17 @@ export default function Lesson() {
                             LEARNING TIP
                     ====================================== */}
 
-                    <div className="mt-12">
+                    <div className="mt-8 sm:mt-12">
 
-                        <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-2xl p-6">
+                        <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-2xl p-4 sm:p-6">
 
-                            <h2 className="text-2xl font-bold">
+                            <h2 className="text-xl font-bold sm:text-2xl">
 
                                 💡 Learning Tip
 
                             </h2>
 
-                            <p className="mt-4 text-lg leading-8 text-slate-700">
+                            <p className="mt-4 break-words text-base leading-7 text-slate-700 sm:text-lg sm:leading-8">
 
                                 {lesson.learning_tip}
 
@@ -465,9 +465,9 @@ export default function Lesson() {
                             QUIZ
                     ====================================== */}
 
-                    <div className="mt-14">
+                    <div className="mt-10 sm:mt-14">
 
-                        <h2 className="text-3xl font-bold">
+                        <h2 className="text-xl font-bold sm:text-3xl">
 
                             📝 Lesson Quiz
 
@@ -479,11 +479,11 @@ export default function Lesson() {
 
                         </p>
 
-                        <div className="mt-8 bg-slate-50 rounded-3xl p-8">
+                        <div className="mt-6 bg-slate-50 rounded-3xl p-4 sm:mt-8 sm:p-8">
 
-                            <div className="flex justify-between items-center">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
 
-                                <h3 className="text-2xl font-bold">
+                                <h3 className="text-xl font-bold sm:text-2xl">
 
                                     Question {currentQuestion + 1}
 
@@ -497,7 +497,7 @@ export default function Lesson() {
 
                             </div>
 
-                            <p className="mt-6 text-xl font-medium">
+                            <p className="mt-6 break-words text-base font-medium leading-7 sm:text-xl">
 
                                 {question.question}
 
@@ -513,7 +513,7 @@ export default function Lesson() {
 
                                         onClick={() => selectOption(option)}
 
-                                        className={`w-full text-left p-5 rounded-2xl border transition-all duration-200
+                                        className={`min-h-[44px] w-full break-words text-left p-4 rounded-2xl border transition-all duration-200 sm:p-5
 
                                         ${selectedAnswers[currentQuestion] === option
 
@@ -533,7 +533,7 @@ export default function Lesson() {
 
                             </div>                            {/* Navigation */}
 
-                            <div className="flex justify-between mt-10">
+                            <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:justify-between">
 
                                 <button
 
@@ -541,7 +541,7 @@ export default function Lesson() {
 
                                     disabled={currentQuestion === 0}
 
-                                    className={`px-8 py-3 rounded-xl font-bold transition
+                                    className={`min-h-[44px] px-6 py-3 rounded-xl font-bold transition sm:px-8
 
                                     ${currentQuestion === 0
 
@@ -565,7 +565,7 @@ export default function Lesson() {
 
                                             onClick={nextQuestion}
 
-                                            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold"
+                                            className="min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold sm:px-8"
 
                                         >
 
@@ -579,7 +579,7 @@ export default function Lesson() {
 
                                             onClick={submitQuiz}
 
-                                            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold"
+                                            className="min-h-[44px] bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold sm:px-8"
 
                                         >
 
@@ -605,9 +605,9 @@ export default function Lesson() {
 
                         quizSubmitted && (
 
-                            <div className="mt-10 rounded-3xl shadow-xl p-8 bg-white border">
+                            <div className="mt-8 rounded-3xl shadow-xl p-4 bg-white border sm:mt-10 sm:p-8">
 
-                                <h2 className="text-3xl font-bold">
+                                <h2 className="text-xl font-bold sm:text-3xl">
 
                                     🎯 Quiz Result
 
@@ -615,7 +615,7 @@ export default function Lesson() {
 
                                 <div className="mt-6">
 
-                                    <h3 className="text-2xl">
+                                    <h3 className="text-xl sm:text-2xl">
 
                                         Score:
 
@@ -633,9 +633,9 @@ export default function Lesson() {
 
                                     passed ? (
 
-                                        <div className="mt-6 bg-green-100 border border-green-400 rounded-2xl p-6">
+                                        <div className="mt-6 bg-green-100 border border-green-400 rounded-2xl p-4 sm:p-6">
 
-                                            <h3 className="text-2xl font-bold text-green-700">
+                                            <h3 className="text-xl font-bold text-green-700 sm:text-2xl">
 
                                                 🎉 Congratulations!
 
@@ -651,9 +651,9 @@ export default function Lesson() {
 
                                     ) : (
 
-                                        <div className="mt-6 bg-red-100 border border-red-400 rounded-2xl p-6">
+                                        <div className="mt-6 bg-red-100 border border-red-400 rounded-2xl p-4 sm:p-6">
 
-                                            <h3 className="text-2xl font-bold text-red-700">
+                                            <h3 className="text-xl font-bold text-red-700 sm:text-2xl">
 
                                                 ❌ Try Again
 
@@ -683,7 +683,7 @@ export default function Lesson() {
 
                                                 disabled={completing}
 
-                                                className={`w-full py-5 rounded-2xl text-xl font-bold transition-all
+                                                className={`touch-target w-full rounded-2xl py-4 text-lg font-bold transition-all sm:py-5 sm:text-xl
 
                                                 ${completing
 

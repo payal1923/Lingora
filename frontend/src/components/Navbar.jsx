@@ -27,13 +27,13 @@ export default function Navbar() {
 
     return (
         <>
-            <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white shadow-sm">
-                <div className="mx-auto flex max-w-7xl items-center px-4 py-3 md:px-6 md:py-4">
+            <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white shadow-sm pt-safe">
+                <div className="mx-auto flex min-w-0 max-w-7xl items-center px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4">
                     {/* Mobile Menu Button */}
                     <button
                         type="button"
                         onClick={() => setIsSidebarOpen(true)}
-                        className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-2xl text-slate-700 transition hover:bg-slate-100 md:hidden"
+                        className="touch-target mr-2 flex shrink-0 items-center justify-center rounded-xl text-2xl text-slate-700 transition hover:bg-slate-100 md:mr-3 md:hidden"
                         aria-label="Open menu"
                     >
                         ☰
@@ -42,19 +42,19 @@ export default function Navbar() {
                     {/* Logo */}
                     <Link
                         to="/dashboard"
-                        className="flex items-center gap-2"
+                        className="flex min-w-0 items-center gap-2"
                     >
                         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 font-bold text-white">
                             L
                         </div>
 
-                        <span className="text-xl font-bold text-slate-800">
+                        <span className="truncate text-xl font-bold text-slate-800">
                             Lingora
                         </span>
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <nav className="hidden flex-1 items-center justify-center gap-5 overflow-x-auto whitespace-nowrap md:flex">
+                    <nav className="hidden min-w-0 flex-1 items-center justify-center gap-5 overflow-x-auto whitespace-nowrap md:flex">
                         <Link
                             to="/home"
                             className={navLinkClass("/home")}
@@ -143,7 +143,7 @@ export default function Navbar() {
                                 <button
                                     type="button"
                                     onClick={handleLogout}
-                                    className="rounded-xl bg-red-500 px-4 py-2 text-sm text-white transition hover:bg-red-600 cursor-pointer touch-manipulation min-h-[40px]"
+                                    className="touch-target rounded-xl bg-red-500 px-4 py-2 text-sm text-white transition hover:bg-red-600 cursor-pointer touch-manipulation"
                                 >
                                     Logout
                                 </button>
@@ -152,7 +152,7 @@ export default function Navbar() {
                             <button
                                 type="button"
                                 onClick={() => navigate("/login")}
-                                className="rounded-xl bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 cursor-pointer touch-manipulation min-h-[40px]"
+                                className="touch-target rounded-xl bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 cursor-pointer touch-manipulation"
                             >
                                 Get Started
                             </button>

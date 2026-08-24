@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import API_URL from "../../config/api";
 import useVocabSpeech from "../../Hooks/useVocabSpeech";
+import useModalBehavior from "../../Hooks/useModalBehavior";
 
 /**
  * VocabQuizModal
@@ -16,6 +17,7 @@ import useVocabSpeech from "../../Hooks/useVocabSpeech";
  */
 export default function VocabQuizModal({ userId, onClose, onXpEarned }) {
     const { speak } = useVocabSpeech();
+    useModalBehavior(true, onClose);
     const [quiz, setQuiz] = useState([]);
     const [loading, setLoading] = useState(true);
     const [current, setCurrent] = useState(0);
@@ -92,11 +94,14 @@ export default function VocabQuizModal({ userId, onClose, onXpEarned }) {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+            className="mobile-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
             onClick={onClose}
         >
             <div
-                className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Vocabulary Quiz"
+                className="mobile-modal-panel w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -113,7 +118,7 @@ export default function VocabQuizModal({ userId, onClose, onXpEarned }) {
                     </div>
                     <button
                         onClick={onClose}
-                        className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                        className="touch-target flex items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
                         aria-label="Close quiz"
                     >
                         ✕
@@ -140,13 +145,13 @@ export default function VocabQuizModal({ userId, onClose, onXpEarned }) {
                         <div className="mt-6 flex justify-center gap-3">
                             <button
                                 onClick={restart}
-                                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95"
+                                className="touch-target rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95"
                             >
                                 🔄 Try Again
                             </button>
                             <button
                                 onClick={onClose}
-                                className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                                className="touch-target rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
                             >
                                 Done
                             </button>
@@ -208,7 +213,7 @@ export default function VocabQuizModal({ userId, onClose, onXpEarned }) {
                                         key={i}
                                         onClick={() => handleSelect(opt)}
                                         disabled={selected !== null}
-                                        className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-medium text-slate-700 transition-all ${cls}`}
+                                        className={`touch-target flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-medium text-slate-700 transition-all ${cls}`}
                                     >
                                         <span>{opt}</span>
                                         {selected !== null && isCorrect && (
@@ -227,7 +232,7 @@ export default function VocabQuizModal({ userId, onClose, onXpEarned }) {
                             <div className="mt-5 flex justify-end">
                                 <button
                                     onClick={handleNext}
-                                    className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95"
+                                    className="touch-target rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-95"
                                 >
                                     {current + 1 >= total
                                         ? "Finish & Earn XP"

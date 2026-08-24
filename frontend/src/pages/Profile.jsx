@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import useModalBehavior from "../Hooks/useModalBehavior";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -178,6 +179,7 @@ export default function Profile() {
 
     // Edit-profile modal
     const [showEditProfile, setShowEditProfile] = useState(false);
+    useModalBehavior(showEditProfile, () => setShowEditProfile(false));
     const [editForm, setEditForm] = useState({
         full_name: user.full_name || user.fullName || user.name || "",
         email: user.email || "",
@@ -637,14 +639,19 @@ export default function Profile() {
 
             {/* EDIT PROFILE MODAL — photo, name, email only */}
             {showEditProfile && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+                <div className="mobile-modal-backdrop fixed inset-0 z-[100] flex items-center justify-center px-4">
                     <button
                         type="button"
                         aria-label="Close edit profile"
                         onClick={() => setShowEditProfile(false)}
                         className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
                     />
-                    <div className="relative z-10 w-full max-w-lg rounded-[28px] bg-white border border-slate-200 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Edit Profile"
+                        className="mobile-modal-panel relative z-10 w-full max-w-lg rounded-[28px] bg-white border border-slate-200 shadow-2xl overflow-hidden"
+                    >
                         <div className="bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 px-6 py-6 sm:px-8">
                             <h2 className="text-2xl font-bold text-white">Edit Profile</h2>
                             <p className="mt-1 text-sm text-white/70">

@@ -2,12 +2,14 @@ import Navbar from "../components/Navbar";
 import { Bot } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import useModalBehavior from "../Hooks/useModalBehavior";
 
 export default function MainLayout({ children }) {
 
     const navigate = useNavigate();
     const location = useLocation();
     const [showAI, setShowAI] = useState(false);
+    useModalBehavior(showAI, () => setShowAI(false));
 
 
     return (
@@ -20,9 +22,14 @@ export default function MainLayout({ children }) {
 
             {location.pathname === "/dashboard" && showAI && (
 
-                <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 px-4 pb-[env(safe-area-inset-bottom)]">
+                <div className="mobile-modal-backdrop fixed inset-0 z-50 flex items-end justify-center px-4 sm:items-center">
 
-                    <div className="relative bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Lingora AI assistant"
+                        className="mobile-modal-panel relative w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl sm:p-8"
+                    >
                         <button
                             onClick={() => setShowAI(false)}
                             aria-label="Close"
@@ -53,7 +60,7 @@ export default function MainLayout({ children }) {
                                     setShowAI(false);
                                     navigate("/conversation");
                                 }}
-                                className="w-full flex items-center gap-4 p-5 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-all duration-300 border border-blue-200"
+                                className="touch-target w-full flex items-center gap-4 p-5 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-all duration-300 border border-blue-200"
                             >
 
                                 <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl">

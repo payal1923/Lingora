@@ -59,9 +59,9 @@ export default function Roadmap() {
 
     return (
 
-        <div className="min-h-screen bg-slate-100 p-10">
+        <div className="min-h-screen overflow-x-hidden bg-slate-100 p-3 sm:p-6 lg:p-10">
 
-            <div className="bg-white rounded-3xl shadow-xl p-8 mb-10">
+            <div className="mb-6 min-w-0 rounded-3xl bg-white p-4 shadow-xl sm:mb-10 sm:p-8">
 
                 <h1 className="typo-page-title text-blue-600">
 
@@ -79,7 +79,7 @@ export default function Roadmap() {
 
                 <div className="mt-8">
 
-                    <div className="flex justify-between typo-secondary mb-3">
+                    <div className="mb-3 flex flex-wrap justify-between gap-2 typo-secondary">
 
                         <span className="font-semibold">
 
@@ -121,7 +121,7 @@ export default function Roadmap() {
 
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
 
                 {lessons.map((lesson, index) => (
 
@@ -139,7 +139,7 @@ export default function Roadmap() {
 
                             }}
 
-                            className={`rounded-3xl shadow-lg p-6 flex justify-between items-center transition-all duration-300
+                            className={`min-h-[44px] min-w-0 rounded-3xl shadow-lg p-4 flex flex-col items-start gap-4 transition-all duration-300 sm:p-6 sm:flex-row sm:items-center sm:justify-between
 
     ${lesson.completed
 
@@ -155,9 +155,9 @@ export default function Roadmap() {
 
                         >
 
-                            <div>
+                            <div className="min-w-0">
 
-                                <h2 className="typo-card-title text-slate-900">
+                                <h2 className="break-words typo-card-title text-slate-900">
 
                                     {lesson.completed
                                         ? "✅"
@@ -169,7 +169,7 @@ export default function Roadmap() {
 
                                 </h2>
 
-                                <p className="typo-secondary text-slate-500 mt-2">
+                                <p className="break-words typo-secondary text-slate-500 mt-2">
 
                                     {lesson.description}
 
@@ -177,7 +177,7 @@ export default function Roadmap() {
 
                             </div>
 
-                            <div className="text-right">
+                            <div className="shrink-0 text-left sm:text-right">
 
                                 <div className="typo-card-title text-yellow-500">
 
@@ -203,7 +203,7 @@ export default function Roadmap() {
 
                         {index !== lessons.length - 1 && (
 
-                            <div className="flex justify-center py-4">
+                            <div className="flex justify-center py-2 sm:py-4">
 
                                 <div className="text-3xl text-blue-500">
 

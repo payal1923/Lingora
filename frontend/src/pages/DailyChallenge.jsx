@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import API_URL from "../config/api";
+import useModalBehavior from "../Hooks/useModalBehavior";
 
 // Deterministic text comparison for answers/options. Ignores leading &
 // trailing spaces, case, and accidental newline/whitespace differences so
@@ -173,16 +174,18 @@ export default function DailyChallenge() {
     // XP Progress
     const progress = userProgress.xp % 100;
 
-    return (
-        <div className="min-h-screen bg-slate-100 py-10">
+    useModalBehavior(!!achievement, () => setAchievement(null));
 
-            <div className="max-w-5xl mx-auto px-6">
+    return (
+        <div className="min-h-screen overflow-x-hidden bg-slate-100 py-4 sm:py-10">
+
+            <div className="mx-auto min-w-0 max-w-5xl px-3 sm:px-6">
 
                 {/* Progress Card */}
 
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl shadow-xl p-8 mb-8">
+                <div className="mb-6 min-w-0 rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-4 text-white shadow-xl sm:mb-8 sm:p-8">
 
-                    <h2 className="text-3xl font-bold">
+                    <h2 className="break-words text-2xl font-bold sm:text-3xl">
                         👋 Welcome {user.full_name || "Learner"}
                     </h2>
 
@@ -190,30 +193,30 @@ export default function DailyChallenge() {
                         Keep learning every day and level up your English.
                     </p>
 
-                    <div className="grid md:grid-cols-4 gap-6 mt-8">
+                    <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-6 md:grid-cols-4">
 
-                        <div className="bg-white/10 rounded-2xl p-5">
+                        <div className="min-w-0 rounded-2xl bg-white/10 p-4 sm:p-5">
                             <p className="typo-stat-label text-blue-100">🏆 Level</p>
                             <h3 className="typo-stat-value text-white">
                                 {userProgress.level}
                             </h3>
                         </div>
 
-                        <div className="bg-white/10 rounded-2xl p-5">
+                        <div className="min-w-0 rounded-2xl bg-white/10 p-4 sm:p-5">
                             <p className="typo-stat-label text-blue-100">⭐ XP</p>
                             <h3 className="typo-stat-value text-white">
                                 {userProgress.xp}
                             </h3>
                         </div>
 
-                        <div className="bg-white/10 rounded-2xl p-5">
+                        <div className="min-w-0 rounded-2xl bg-white/10 p-4 sm:p-5">
                             <p className="typo-stat-label text-blue-100">🎓 Rank</p>
-                            <h3 className="typo-card-title text-white">
+                            <h3 className="break-words typo-card-title text-white">
                                 {userProgress.english_rank}
                             </h3>
                         </div>
 
-                        <div className="bg-white/10 rounded-2xl p-5">
+                        <div className="min-w-0 rounded-2xl bg-white/10 p-4 sm:p-5">
                             <p className="typo-stat-label text-blue-100">🔥 Streak</p>
                             <h3 className="typo-stat-value text-white">
                                 {userProgress.streak}
@@ -224,7 +227,7 @@ export default function DailyChallenge() {
 
                     <div className="mt-8">
 
-                        <div className="flex justify-between typo-secondary text-white mb-2">
+                        <div className="mb-2 flex flex-wrap justify-between gap-2 typo-secondary text-white">
                             <span>Level Progress</span>
                             <span>{progress}/100 XP</span>
                         </div>
@@ -244,7 +247,7 @@ export default function DailyChallenge() {
 
                 {/* Daily Challenge */}
 
-                <div className="bg-white rounded-3xl shadow-lg p-8">
+                <div className="min-w-0 rounded-3xl bg-white p-4 shadow-lg sm:p-8">
 
                     <h1 className="typo-page-title text-blue-600 mb-3">
                         🔥 Daily Challenge
@@ -254,7 +257,7 @@ export default function DailyChallenge() {
                         Complete today's challenge and earn XP!
                     </p>
 
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 mb-8">
+                    <div className="mb-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 sm:mb-8 sm:p-5">
 
                         <h2 className="typo-card-title text-yellow-700">
                             🎁 Reward
@@ -283,14 +286,14 @@ export default function DailyChallenge() {
 
                             <div
                                 key={q.id}
-                                className="bg-slate-50 border rounded-2xl p-6 mb-6"
+                                className="mb-4 min-w-0 rounded-2xl border bg-slate-50 p-4 sm:mb-6 sm:p-6"
                             >
 
-                                <h2 className="font-bold text-xl mb-3">
+                                <h2 className="mb-3 text-xl font-bold sm:text-xl">
                                     Question {index + 1}/5
                                 </h2>
 
-                                <p className="mb-5">
+                                <p className="mb-5 break-words leading-7">
                                     {q.question}
                                 </p>
 
@@ -330,7 +333,7 @@ export default function DailyChallenge() {
 
                                             <label
                                                 key={`${q.id}-${optionIndex}`}
-                                                className={`block p-4 rounded-xl border cursor-pointer ${style}`}
+                                                className={`flex min-h-[44px] w-full min-w-0 items-start rounded-xl border p-4 cursor-pointer ${style}`}
                                             >
 
                                                 <input
@@ -340,10 +343,10 @@ export default function DailyChallenge() {
                                                     onChange={() =>
                                                         handleSelect(q.id, option)
                                                     }
-                                                    className="mr-3"
+                                                    className="mr-3 mt-1 shrink-0"
                                                 />
 
-                                                {option}
+                                                <span className="min-w-0 break-words">{option}</span>
                                             </label>
 
                                         );
@@ -354,13 +357,13 @@ export default function DailyChallenge() {
 
                                 {submitted && q.explanation && (
 
-                                    <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                    <div className="mt-4 min-w-0 rounded-xl border border-blue-200 bg-blue-50 p-4">
 
                                         <h3 className="font-bold text-blue-700 mb-2">
                                             💡 Explanation
                                         </h3>
 
-                                        <p>{q.explanation}</p>
+                                        <p className="break-words leading-7">{q.explanation}</p>
 
                                     </div>
 
@@ -376,7 +379,7 @@ export default function DailyChallenge() {
 
                         <button
                             onClick={handleSubmit}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold transition"
+                            className="touch-target w-full rounded-xl bg-blue-600 py-4 font-bold text-white transition hover:bg-blue-700"
                         >
                             Submit Challenge
                         </button>
@@ -385,21 +388,21 @@ export default function DailyChallenge() {
 
                     {submitted && (
 
-                        <div className="mt-8 bg-green-50 border border-green-200 rounded-2xl p-8">
+                        <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-4 sm:mt-8 sm:p-8">
 
-                            <h2 className="text-3xl font-bold">
+                            <h2 className="break-words text-xl font-bold sm:text-3xl">
                                 🎉 Challenge Completed
                             </h2>
 
-                            <div className="grid md:grid-cols-2 gap-6 mt-6">
+                            <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-2">
 
                                 <div>
 
-                                    <p className="text-lg">
+                                    <p className="text-base sm:text-lg">
                                         ✅ Score
                                     </p>
 
-                                    <h3 className="text-3xl font-bold">
+                                    <h3 className="text-2xl font-bold sm:text-3xl">
                                         {score}/5
                                     </h3>
 
@@ -407,11 +410,11 @@ export default function DailyChallenge() {
 
                                 <div>
 
-                                    <p className="text-lg">
+                                    <p className="text-base sm:text-lg">
                                         ⭐ XP Earned
                                     </p>
 
-                                    <h3 className="text-3xl font-bold text-blue-600">
+                                    <h3 className="text-2xl font-bold text-blue-600 sm:text-3xl">
                                         +{score * 10}
                                     </h3>
 
@@ -429,23 +432,28 @@ export default function DailyChallenge() {
             {
                 achievement && (
 
-                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div className="mobile-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
-                        <div className="bg-white rounded-3xl shadow-2xl p-10 text-center max-w-sm">
+                        <div
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label="Achievement unlocked"
+                            className="mobile-modal-panel w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl sm:p-10"
+                        >
 
-                            <h2 className="text-3xl font-bold mb-6">
+                            <h2 className="mb-6 break-words text-2xl font-bold sm:text-3xl">
 
                                 🎉 Achievement Unlocked!
 
                             </h2>
 
-                            <div className="text-7xl mb-4">
+                            <div className="mb-4 text-6xl sm:text-7xl">
 
                                 {achievement.badge_icon}
 
                             </div>
 
-                            <h3 className="text-2xl font-bold">
+                            <h3 className="break-words text-xl font-bold sm:text-2xl">
 
                                 {achievement.badge_name}
 
@@ -465,7 +473,7 @@ export default function DailyChallenge() {
 
                                 onClick={() => setAchievement(null)}
 
-                                className="mt-8 bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700"
+                                className="touch-target mt-8 rounded-xl bg-blue-600 px-8 py-3 text-white hover:bg-blue-700"
 
                             >
 

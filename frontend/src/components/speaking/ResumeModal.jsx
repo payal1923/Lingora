@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import useModalBehavior from "../../Hooks/useModalBehavior";
 
 const STEP_LABELS = {
     vocabulary: "Vocabulary",
@@ -38,6 +39,7 @@ export default function ResumeModal({ open, saved, onContinue, onRestart }) {
     // The "time ago" string is derived from the current time, so it must be
     // computed in an effect (not during render) to keep the component pure.
     const [timeAgoText, setTimeAgoText] = useState("");
+    useModalBehavior(open && !!saved, onRestart);
 
     useEffect(() => {
         // Defer the setState to a microtask so it is not synchronous inside
@@ -66,7 +68,7 @@ export default function ResumeModal({ open, saved, onContinue, onRestart }) {
         <AnimatePresence>
             {open && saved && (
                 <motion.div
-                    className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+                    className="mobile-modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -79,7 +81,10 @@ export default function ResumeModal({ open, saved, onContinue, onRestart }) {
 
                     {/* Dialog */}
                     <motion.div
-                        className="relative w-full max-w-sm rounded-3xl bg-white shadow-2xl border border-white/70 overflow-hidden"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Resume lesson"
+                        className="mobile-modal-panel relative w-full max-w-sm rounded-3xl bg-white shadow-2xl border border-white/70 overflow-hidden"
                         initial={{ scale: 0.9, y: 20 }}
                         animate={{ scale: 1, y: 0 }}
                         exit={{ scale: 0.9, y: 20 }}
@@ -107,13 +112,13 @@ export default function ResumeModal({ open, saved, onContinue, onRestart }) {
                         <div className="px-6 pb-6 grid grid-cols-2 gap-3">
                             <button
                                 onClick={onRestart}
-                                className="h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-[0.98] transition-all text-sm font-bold text-slate-600"
+                                className="touch-target h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-[0.98] transition-all text-sm font-bold text-slate-600"
                             >
                                 Restart
                             </button>
                             <button
                                 onClick={onContinue}
-                                className="h-12 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 active:scale-[0.98] transition-all text-sm font-bold text-white shadow-lg shadow-indigo-500/30"
+                                className="touch-target h-12 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 active:scale-[0.98] transition-all text-sm font-bold text-white shadow-lg shadow-indigo-500/30"
                             >
                                 Continue →
                             </button>

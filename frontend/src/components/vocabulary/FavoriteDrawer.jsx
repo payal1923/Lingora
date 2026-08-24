@@ -1,4 +1,5 @@
 import useVocabSpeech from "../../Hooks/useVocabSpeech";
+import useModalBehavior from "../../Hooks/useModalBehavior";
 
 /**
  * FavoriteDrawer
@@ -13,23 +14,27 @@ import useVocabSpeech from "../../Hooks/useVocabSpeech";
  */
 export default function FavoriteDrawer({ open, favorites, onClose, onRemove }) {
     const { speak, speakSlow } = useVocabSpeech();
+    useModalBehavior(open, onClose);
 
     return (
         <>
             {/* Backdrop */}
             <div
-                className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${open ? "opacity-100" : "pointer-events-none opacity-0"
+                className={`mobile-modal-backdrop fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${open ? "opacity-100" : "pointer-events-none opacity-0"
                     }`}
                 onClick={onClose}
             />
 
             {/* Drawer */}
             <aside
-                className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Saved words"
+                className={`fixed right-0 top-0 z-50 flex h-dvh w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"
                     }`}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-slate-100 p-5">
+                <div className="flex items-center justify-between border-b border-slate-100 px-5 pb-4 pt-safe">
                     <div>
                         <h2 className="text-lg font-bold text-slate-800">
                             ⭐ Saved Words
@@ -40,7 +45,7 @@ export default function FavoriteDrawer({ open, favorites, onClose, onRemove }) {
                     </div>
                     <button
                         onClick={onClose}
-                        className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                        className="touch-target rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
                         aria-label="Close favorites"
                     >
                         ✕
@@ -48,7 +53,7 @@ export default function FavoriteDrawer({ open, favorites, onClose, onRemove }) {
                 </div>
 
                 {/* List */}
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto overscroll-contain p-4 pb-safe">
                     {favorites.length === 0 ? (
                         <div className="flex h-full flex-col items-center justify-center text-center">
                             <span className="text-5xl">📭</span>
@@ -74,14 +79,14 @@ export default function FavoriteDrawer({ open, favorites, onClose, onRemove }) {
                                                 </h3>
                                                 <button
                                                     onClick={() => speak(word.word)}
-                                                    className="rounded-full p-1 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600"
+                                                    className="touch-target rounded-full p-1 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600"
                                                     aria-label={`Listen to ${word.word}`}
                                                 >
                                                     🔊
                                                 </button>
                                                 <button
                                                     onClick={() => speakSlow(word.word)}
-                                                    className="rounded-full p-1 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600"
+                                                    className="touch-target rounded-full p-1 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600"
                                                     aria-label={`Slow pronunciation of ${word.word}`}
                                                 >
                                                     🐢
